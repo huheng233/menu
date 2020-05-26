@@ -11,7 +11,7 @@ defmodule Menu.Application do
       # Start the Ecto repository
       supervisor(Menu.Repo, []),
       # Start the endpoint when the application starts
-      supervisor(MenuWeb.Endpoint, []),
+      supervisor(MenuWeb.Endpoint, [])
       # Start your own worker by calling: Menu.Worker.start_link(arg1, arg2, arg3)
       # worker(Menu.Worker, [arg1, arg2, arg3]),
     ]
