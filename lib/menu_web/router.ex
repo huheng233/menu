@@ -17,6 +17,15 @@ defmodule MenuWeb.Router do
     # Use the default browser stack
     pipe_through(:browser)
 
+    get("/users", UserController, :index)
+    get("/users/:id/edit", UserController, :edit)
+    get("/users/new", UserController, :new)
+    get("/users/:id", UserController, :show)
+    post("/users", UserController, :create)
+    patch("/users/:id", UserController, :update)
+    put("/users/:id", UserController, :update)
+    delete("/users/:id", UserController, :delete)
+
     get("/", PageController, :index)
   end
 
