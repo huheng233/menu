@@ -2,11 +2,10 @@ defmodule Menu.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
-
   schema "users" do
-    field :email, :string
-    field :password, :string
-    field :username, :string
+    field(:email, :string)
+    field(:password, :string)
+    field(:username, :string)
 
     timestamps()
   end
@@ -15,8 +14,8 @@ defmodule Menu.Accounts.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:username, :email, :password])
-    |> validate_required([:username, :email, :password])
-    |> unique_constraint(:username)
+    |> validate_required([:username, :email, :password], message: "请填写")
+    |> unique_constraint(:username, message: "用户名已被人占用")
     |> unique_constraint(:email)
   end
 end
