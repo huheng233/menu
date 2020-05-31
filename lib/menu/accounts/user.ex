@@ -20,6 +20,8 @@ defmodule Menu.Accounts.User do
     |> validate_length(:username, max: 15, message: "用户名最长 15 位")
     |> validate_exclusion(:username, ~w(admin administrator), message: "系统保留，无法注册，请更换")
     |> unique_constraint(:username, name: :users_lower_username_index, message: "用户名已被人占用")
-    |> unique_constraint(:email)
+    |> validate_format(:email, ~r/@/, message: "邮箱格式错误")
+    |> unique_constraint(:email, name: :users_lower_email_index, message: "邮箱已被人占用")
+    |> validate_length(:password, min: 6, message: "密码最短 6 位")
   end
 end

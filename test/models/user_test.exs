@@ -82,4 +82,37 @@ defmodule Menu.UserTest do
              | username: "administrator"
            })
   end
+
+  test "email should not be blank" do
+    assert {:email, "请填写"} in errors_on(%User{}, %{@valid_attrs | email: ""})
+  end
+
+  test "email should contain @" do
+    assert {:email, "邮箱格式错误"} in errors_on(%User{}, %{@valid_attrs | email: "abc"})
+  end
+
+  test "email should be unique" do
+    Menu.Repo.insert!(User.changeset(%User{}, @valid_attrs))
+    changeset = User.changeset(%User{}, %{@valid_attrs | username: "haha"})
+    assert {:error, err_changeset} = Menu.Repo.insert(changeset)
+    assert {:email, "邮箱已被人占用"} in errors_on(err_changeset)
+  end
+
+  test "email should be case insensitive" do
+    Menu.Repo.insert!(User.changeset(%User{}, @valid_attrs))
+    attrs = %{@valid_attrs | username: "haha", email: "Some@content.com"}
+    changeset = User.changeset(%User{}, attrs)
+    assert {:error, err_changeset} = Menu.Repo.insert(changeset)
+    assert {:email, "邮箱已被人占用"} in errors_on(err_changeset)
+  end
+
+  test "password is required" do
+    attrs = %{@valid_attrs | password: ""}
+    assert {:password, "请填写"} in errors_on(%User{}, attrs)
+  end
+
+  test "password's length should be larger than 6" do
+    attrs = %{@valid_attrs | password: String.duplicate("1", 5)}
+    assert {:password, "密码最短 6 位"} in errors_on(%User{}, attrs)
+  end
 end
