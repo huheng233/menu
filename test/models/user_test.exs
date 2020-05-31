@@ -115,4 +115,9 @@ defmodule Menu.UserTest do
     attrs = %{@valid_attrs | password: String.duplicate("1", 5)}
     assert {:password, "密码最短 6 位"} in errors_on(%User{}, attrs)
   end
+
+  test "password should be hashed" do
+    %{changes: changes} = User.changeset(%User{}, @valid_attrs)
+    assert Comeonin.Bcrypt.checkpw(changes.password, changes.password_hash)
+  end
 end
