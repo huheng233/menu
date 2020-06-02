@@ -3,8 +3,12 @@ defmodule MenuWeb.UserControllerTest do
 
   alias Menu.Accounts
 
-  @create_attrs %{email: "some email", password: "some password", username: "some username"}
-  @update_attrs %{email: "some updated email", password: "some updated password", username: "some updated username"}
+  @create_attrs %{email: "some@email", password: "somepassword", username: "someusername"}
+  @update_attrs %{
+    email: "someupdated@email",
+    password: "someupdatedpassword",
+    username: "updatedname"
+  }
   @invalid_attrs %{email: nil, password: nil, username: nil}
 
   def fixture(:user) do
@@ -14,31 +18,31 @@ defmodule MenuWeb.UserControllerTest do
 
   describe "index" do
     test "lists all users", %{conn: conn} do
-      conn = get conn, user_path(conn, :index)
+      conn = get(conn, user_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Users"
     end
   end
 
   describe "new user" do
     test "renders form", %{conn: conn} do
-      conn = get conn, user_path(conn, :new)
+      conn = get(conn, user_path(conn, :new))
       assert html_response(conn, 200) =~ "New User"
     end
   end
 
   describe "create user" do
     test "redirects to show when data is valid", %{conn: conn} do
-      conn = post conn, user_path(conn, :create), user: @create_attrs
+      conn = post(conn, user_path(conn, :create), user: @create_attrs)
 
       assert %{id: id} = redirected_params(conn)
       assert redirected_to(conn) == user_path(conn, :show, id)
 
-      conn = get conn, user_path(conn, :show, id)
+      conn = get(conn, user_path(conn, :show, id))
       assert html_response(conn, 200) =~ "Show User"
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post conn, user_path(conn, :create), user: @invalid_attrs
+      conn = post(conn, user_path(conn, :create), user: @invalid_attrs)
       assert html_response(conn, 200) =~ "New User"
     end
   end
@@ -47,7 +51,7 @@ defmodule MenuWeb.UserControllerTest do
     setup [:create_user]
 
     test "renders form for editing chosen user", %{conn: conn, user: user} do
-      conn = get conn, user_path(conn, :edit, user)
+      conn = get(conn, user_path(conn, :edit, user))
       assert html_response(conn, 200) =~ "Edit User"
     end
   end
@@ -56,15 +60,15 @@ defmodule MenuWeb.UserControllerTest do
     setup [:create_user]
 
     test "redirects when data is valid", %{conn: conn, user: user} do
-      conn = put conn, user_path(conn, :update, user), user: @update_attrs
-      assert redirected_to(conn) == user_path(conn, :show, user)
+      conn = put(conn, user_path(conn, :update, user), user: @update_attrs)
+      assert redirected_to(conn, 302) == user_path(conn, :show, user)
 
-      conn = get conn, user_path(conn, :show, user)
-      assert html_response(conn, 200) =~ "some updated email"
+      conn = get(conn, user_path(conn, :show, user))
+      assert html_response(conn, 200) =~ "someupdated@email"
     end
 
     test "renders errors when data is invalid", %{conn: conn, user: user} do
-      conn = put conn, user_path(conn, :update, user), user: @invalid_attrs
+      conn = put(conn, user_path(conn, :update, user), user: @invalid_attrs)
       assert html_response(conn, 200) =~ "Edit User"
     end
   end
@@ -73,11 +77,12 @@ defmodule MenuWeb.UserControllerTest do
     setup [:create_user]
 
     test "deletes chosen user", %{conn: conn, user: user} do
-      conn = delete conn, user_path(conn, :delete, user)
+      conn = delete(conn, user_path(conn, :delete, user))
       assert redirected_to(conn) == user_path(conn, :index)
-      assert_error_sent 404, fn ->
-        get conn, user_path(conn, :show, user)
-      end
+
+      assert_error_sent(404, fn ->
+        get(conn, user_path(conn, :show, user))
+      end)
     end
   end
 
