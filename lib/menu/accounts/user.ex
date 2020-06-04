@@ -6,6 +6,7 @@ defmodule Menu.Accounts.User do
     field(:email, :string)
     field(:password, :string, virtual: true)
     field(:username, :string)
+    field(:password_hash, :string)
 
     timestamps()
   end

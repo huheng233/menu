@@ -7,6 +7,7 @@ defmodule MenuWeb.Router do
     plug(:fetch_flash)
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
+    plug(MenuWeb.Auth, repo: Menu.Repo)
   end
 
   pipeline :api do
@@ -17,6 +18,7 @@ defmodule MenuWeb.Router do
     # Use the default browser stack
     pipe_through(:browser)
 
+    # 用户增删该查
     get("/users", UserController, :index)
     get("/users/:id/edit", UserController, :edit)
     get("/users/new", UserController, :new)
@@ -25,6 +27,10 @@ defmodule MenuWeb.Router do
     patch("/users/:id", UserController, :update)
     put("/users/:id", UserController, :update)
     delete("/users/:id", UserController, :delete)
+
+    # 用户登录
+    get("/sessions/new", SessionController, :new)
+    post("/sessions/new", SessionController, :create)
 
     get("/", PageController, :index)
   end
