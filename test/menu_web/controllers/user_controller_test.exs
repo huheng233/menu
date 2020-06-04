@@ -2,6 +2,8 @@ defmodule MenuWeb.UserControllerTest do
   use MenuWeb.ConnCase
 
   alias Menu.Accounts
+  alias Menu.Repo
+  alias Menu.Accounts.User
 
   @create_attrs %{email: "some@email", password: "somepassword", username: "someusername"}
   @update_attrs %{
@@ -33,12 +35,10 @@ defmodule MenuWeb.UserControllerTest do
   describe "create user" do
     test "redirects to show when data is valid", %{conn: conn} do
       conn = post(conn, user_path(conn, :create), user: @create_attrs)
-
-      assert %{id: id} = redirected_params(conn)
-      assert redirected_to(conn) == user_path(conn, :show, id)
-
-      conn = get(conn, user_path(conn, :show, id))
-      assert html_response(conn, 200) =~ "Show User"
+      assert Repo.get_by(User, @create_attrs |> Map.delete(:password))
+      assert redirected_to(conn) == page_path(conn, :index)
+      conn = get(conn, user_path(conn, :index))
+      assert html_response(conn, 200) =~ Map.get(@create_attrs, :username)
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
