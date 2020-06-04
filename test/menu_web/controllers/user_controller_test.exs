@@ -33,12 +33,13 @@ defmodule MenuWeb.UserControllerTest do
   end
 
   describe "create user" do
-    test "redirects to show when data is valid", %{conn: conn} do
+    test "redirects to index when data is valid", %{conn: conn} do
       conn = post(conn, user_path(conn, :create), user: @create_attrs)
       assert Repo.get_by(User, @create_attrs |> Map.delete(:password))
       assert redirected_to(conn) == page_path(conn, :index)
       conn = get(conn, user_path(conn, :index))
       assert html_response(conn, 200) =~ Map.get(@create_attrs, :username)
+      assert html_response(conn, 200) =~ "退出"
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
@@ -83,6 +84,19 @@ defmodule MenuWeb.UserControllerTest do
       assert_error_sent(404, fn ->
         get(conn, user_path(conn, :show, user))
       end)
+    end
+  end
+
+  describe "logouts user" do
+    setup [:create_user]
+
+    test "logouts user when logout button clicked", %{conn: conn, user: user} do
+      login_params = Map.delete(@create_attrs, :username)
+      login_path = session_path(conn, :create)
+      conn = post(conn, login_path, session: login_params)
+      conn = delete(conn, session_path(conn, :delete, user))
+      assert get_flash(conn, :info) == "退出成功"
+      assert redirected_to(conn) == page_path(conn, :index)
     end
   end
 

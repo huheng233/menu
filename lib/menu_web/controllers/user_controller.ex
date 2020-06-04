@@ -3,6 +3,7 @@ defmodule MenuWeb.UserController do
 
   alias Menu.Accounts
   alias Menu.Accounts.User
+  alias MenuWeb.Auth
 
   def index(conn, _params) do
     users = Accounts.list_users()
@@ -19,7 +20,7 @@ defmodule MenuWeb.UserController do
       {:ok, user} ->
         conn
         |> put_flash(:info, "User created successfully.")
-        |> put_session(:user_id, user.id)
+        |> Auth.login(user)
         |> redirect(to: page_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->

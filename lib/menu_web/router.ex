@@ -31,6 +31,7 @@ defmodule MenuWeb.Router do
     # 用户登录
     get("/sessions/new", SessionController, :new)
     post("/sessions/new", SessionController, :create)
+    delete("/session/:id", SessionController, :delete)
 
     get("/", PageController, :index)
   end
