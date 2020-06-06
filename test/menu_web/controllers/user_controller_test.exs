@@ -60,6 +60,7 @@ defmodule MenuWeb.UserControllerTest do
   describe "update user" do
     setup [:create_user]
 
+    @tag update_user_valid: true
     test "redirects when data is valid", %{conn: conn, user: user} do
       conn = put(conn, user_path(conn, :update, user), user: @update_attrs)
       assert redirected_to(conn, 302) == user_path(conn, :show, user)
@@ -68,6 +69,7 @@ defmodule MenuWeb.UserControllerTest do
       assert html_response(conn, 200) =~ "someupdated@email"
     end
 
+    @tag update_user_valid: false
     test "renders errors when data is invalid", %{conn: conn, user: user} do
       conn = put(conn, user_path(conn, :update, user), user: @invalid_attrs)
       assert html_response(conn, 200) =~ "Edit User"
