@@ -1,9 +1,26 @@
 defmodule MenuWeb.UserController do
   use MenuWeb, :controller
 
+  plug(:login_require when action in [:index, :show, :edit, :update, :delete])
+
   alias Menu.Accounts
   alias Menu.Accounts.User
   alias MenuWeb.Auth
+
+  @doc """
+  检查用户登录状态
+  Returns `conn`
+  """
+  def login_require(conn, _opts) do
+    if(conn.assigns.current_user) do
+      conn
+    else
+      conn
+      |> put_flash(:info, "请先登录")
+      |> redirect(to: session_path(conn, :new))
+      |> halt()
+    end
+  end
 
   def index(conn, _params) do
     users = Accounts.list_users()

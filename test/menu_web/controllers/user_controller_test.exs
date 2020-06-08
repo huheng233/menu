@@ -13,11 +13,23 @@ defmodule MenuWeb.UserControllerTest do
   }
   @invalid_attrs %{email: nil, password: nil, username: nil}
 
+  setup %{conn: conn} = context do
+    if context[:logged_in] == true do
+      # 如果上下文里 :logged_in 值为 true
+      user = Repo.insert!(User.changeset(%User{}, @create_attrs))
+      conn = post(conn, session_path(conn, :create), session: @create_attrs)
+      {:ok, [conn: conn, user: user]}
+    else
+      :ok
+    end
+  end
+
   def fixture(:user) do
     {:ok, user} = Accounts.create_user(@create_attrs)
     user
   end
 
+  @tag logged_in: true
   describe "index" do
     test "lists all users", %{conn: conn} do
       conn = get(conn, user_path(conn, :index))
@@ -49,8 +61,7 @@ defmodule MenuWeb.UserControllerTest do
   end
 
   describe "edit user" do
-    setup [:create_user]
-
+    @tag logged_in: true
     test "renders form for editing chosen user", %{conn: conn, user: user} do
       conn = get(conn, user_path(conn, :edit, user))
       assert html_response(conn, 200) =~ "Edit User"
@@ -58,9 +69,7 @@ defmodule MenuWeb.UserControllerTest do
   end
 
   describe "update user" do
-    setup [:create_user]
-
-    @tag update_user_valid: true
+    @tag logged_in: true
     test "redirects when data is valid", %{conn: conn, user: user} do
       conn = put(conn, user_path(conn, :update, user), user: @update_attrs)
       assert redirected_to(conn, 302) == user_path(conn, :show, user)
@@ -69,7 +78,7 @@ defmodule MenuWeb.UserControllerTest do
       assert html_response(conn, 200) =~ "someupdated@email"
     end
 
-    @tag update_user_valid: false
+    @tag logged_in: true
     test "renders errors when data is invalid", %{conn: conn, user: user} do
       conn = put(conn, user_path(conn, :update, user), user: @invalid_attrs)
       assert html_response(conn, 200) =~ "Edit User"
@@ -77,15 +86,13 @@ defmodule MenuWeb.UserControllerTest do
   end
 
   describe "delete user" do
-    setup [:create_user]
-
+    @tag logged_in: true
     test "deletes chosen user", %{conn: conn, user: user} do
       conn = delete(conn, user_path(conn, :delete, user))
       assert redirected_to(conn) == user_path(conn, :index)
 
-      assert_error_sent(404, fn ->
-        get(conn, user_path(conn, :show, user))
-      end)
+      conn = get(conn, user_path(conn, :show, user))
+      assert redirected_to(conn, 302) == session_path(conn, :new)
     end
   end
 
@@ -100,6 +107,24 @@ defmodule MenuWeb.UserControllerTest do
       assert get_flash(conn, :info) == "退出成功"
       assert redirected_to(conn) == page_path(conn, :index)
     end
+  end
+
+  test "guest access user action redirected to login page", %{conn: conn} do
+    user = Repo.insert!(%User{})
+
+    Enum.each(
+      [
+        get(conn, user_path(conn, :index)),
+        get(conn, user_path(conn, :show, user)),
+        get(conn, user_path(conn, :edit, user)),
+        put(conn, user_path(conn, :update, user), user: %{}),
+        delete(conn, user_path(conn, :delete, user))
+      ],
+      fn conn ->
+        assert redirected_to(conn) == session_path(conn, :new)
+        assert conn.halted
+      end
+    )
   end
 
   defp create_user(_) do
