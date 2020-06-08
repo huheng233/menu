@@ -127,6 +127,24 @@ defmodule MenuWeb.UserControllerTest do
     )
   end
 
+  @tag logged_in: true
+  test "does not allow access to other user path", %{conn: conn, user: user} do
+    another_user = Repo.insert!(%User{})
+
+    Enum.each(
+      [
+        get(conn, user_path(conn, :show, another_user)),
+        get(conn, user_path(conn, :edit, another_user)),
+        put(conn, user_path(conn, :update, another_user), user: %{})
+      ],
+      fn conn ->
+        assert get_flash(conn, :error) == "禁止访问未授权页面"
+        assert redirected_to(conn) == user_path(conn, :show, user)
+        assert conn.halted
+      end
+    )
+  end
+
   defp create_user(_) do
     user = fixture(:user)
     {:ok, user: user}
