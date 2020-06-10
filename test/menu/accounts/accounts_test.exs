@@ -76,8 +76,20 @@ defmodule Menu.AccountsTest do
   describe "recipes" do
     alias Menu.Accounts.Recipe
 
-    @valid_attrs %{content: "some content", episode: 42, name: "some name", season: 42, title: "some title"}
-    @update_attrs %{content: "some updated content", episode: 43, name: "some updated name", season: 43, title: "some updated title"}
+    @valid_attrs %{
+      content: "some content",
+      episode: 42,
+      name: "some name",
+      season: 42,
+      title: "some title"
+    }
+    @update_attrs %{
+      content: "some updated content",
+      episode: 43,
+      name: "some updated name",
+      season: 43,
+      title: "some updated title"
+    }
     @invalid_attrs %{content: nil, episode: nil, name: nil, season: nil, title: nil}
 
     def recipe_fixture(attrs \\ %{}) do
