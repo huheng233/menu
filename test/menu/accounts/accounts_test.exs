@@ -72,4 +72,72 @@ defmodule Menu.AccountsTest do
       assert %Ecto.Changeset{} = Accounts.change_user(user)
     end
   end
+
+  describe "recipes" do
+    alias Menu.Accounts.Recipe
+
+    @valid_attrs %{content: "some content", episode: 42, name: "some name", season: 42, title: "some title"}
+    @update_attrs %{content: "some updated content", episode: 43, name: "some updated name", season: 43, title: "some updated title"}
+    @invalid_attrs %{content: nil, episode: nil, name: nil, season: nil, title: nil}
+
+    def recipe_fixture(attrs \\ %{}) do
+      {:ok, recipe} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Accounts.create_recipe()
+
+      recipe
+    end
+
+    test "list_recipes/0 returns all recipes" do
+      recipe = recipe_fixture()
+      assert Accounts.list_recipes() == [recipe]
+    end
+
+    test "get_recipe!/1 returns the recipe with given id" do
+      recipe = recipe_fixture()
+      assert Accounts.get_recipe!(recipe.id) == recipe
+    end
+
+    test "create_recipe/1 with valid data creates a recipe" do
+      assert {:ok, %Recipe{} = recipe} = Accounts.create_recipe(@valid_attrs)
+      assert recipe.content == "some content"
+      assert recipe.episode == 42
+      assert recipe.name == "some name"
+      assert recipe.season == 42
+      assert recipe.title == "some title"
+    end
+
+    test "create_recipe/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Accounts.create_recipe(@invalid_attrs)
+    end
+
+    test "update_recipe/2 with valid data updates the recipe" do
+      recipe = recipe_fixture()
+      assert {:ok, recipe} = Accounts.update_recipe(recipe, @update_attrs)
+      assert %Recipe{} = recipe
+      assert recipe.content == "some updated content"
+      assert recipe.episode == 43
+      assert recipe.name == "some updated name"
+      assert recipe.season == 43
+      assert recipe.title == "some updated title"
+    end
+
+    test "update_recipe/2 with invalid data returns error changeset" do
+      recipe = recipe_fixture()
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_recipe(recipe, @invalid_attrs)
+      assert recipe == Accounts.get_recipe!(recipe.id)
+    end
+
+    test "delete_recipe/1 deletes the recipe" do
+      recipe = recipe_fixture()
+      assert {:ok, %Recipe{}} = Accounts.delete_recipe(recipe)
+      assert_raise Ecto.NoResultsError, fn -> Accounts.get_recipe!(recipe.id) end
+    end
+
+    test "change_recipe/1 returns a recipe changeset" do
+      recipe = recipe_fixture()
+      assert %Ecto.Changeset{} = Accounts.change_recipe(recipe)
+    end
+  end
 end

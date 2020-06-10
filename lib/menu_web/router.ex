@@ -33,6 +33,9 @@ defmodule MenuWeb.Router do
     post("/sessions/new", SessionController, :create)
     delete("/session/:id", SessionController, :delete)
 
+    # 菜单
+    resources("/recipes", RecipeController)
+
     get("/", PageController, :index)
   end
 

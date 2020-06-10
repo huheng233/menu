@@ -1,0 +1,5 @@
+<h2>New Recipe</h2>
+
+<%= render "form.html", Map.put(assigns, :action, recipe_path(@conn, :create)) %>
+
+<span><%= link "Back", to: recipe_path(@conn, :index) %></span>
