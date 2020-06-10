@@ -43,11 +43,22 @@ defmodule Menu.DataCase do
       assert %{password: ["password is too short"]} = errors_on(changeset)
 
   """
+  # def errors_on(changeset) do
+  #   Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
+  #     Enum.reduce(opts, message, fn {key, value}, acc ->
+  #       String.replace(acc, "%{#{key}}", to_string(value))
+  #     end)
+  #   end)
+  # end
   def errors_on(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
-      Enum.reduce(opts, message, fn {key, value}, acc ->
-        String.replace(acc, "%{#{key}}", to_string(value))
-      end)
-    end)
+    changeset
+    |> Ecto.Changeset.traverse_errors(&MenuWeb.ErrorHelpers.translate_error/1)
+    |> Enum.flat_map(fn {key, errors} -> for msg <- errors, do: {key, msg} end)
+  end
+
+  @spec errors_on(atom | %{__struct__: atom}, any) :: [any]
+  def errors_on(struct, data) do
+    struct.__struct__.changeset(struct, data)
+    |> errors_on
   end
 end

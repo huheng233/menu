@@ -20,19 +20,19 @@ defmodule MenuWeb.ConnCase do
       # Import conveniences for testing with connections
       use Phoenix.ConnTest
       import MenuWeb.Router.Helpers
-
+      alias Menu.Repo
       # The default endpoint for testing
       @endpoint MenuWeb.Endpoint
     end
   end
 
-
   setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Menu.Repo)
+
     unless tags[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(Menu.Repo, {:shared, self()})
     end
+
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
-
 end

@@ -1,9 +1,10 @@
 defmodule Menu.AccountsTest do
   use Menu.DataCase
-
+  # use Menu.ModelCase
   @moduletag :accounts
 
   alias Menu.Accounts
+  alias Menu.Accounts.User
 
   describe "users" do
     alias Menu.Accounts.User
@@ -81,7 +82,8 @@ defmodule Menu.AccountsTest do
       episode: 42,
       name: "some name",
       season: 42,
-      title: "some title"
+      title: "some title",
+      user_id: 1
     }
     @update_attrs %{
       content: "some updated content",
@@ -101,18 +103,31 @@ defmodule Menu.AccountsTest do
       recipe
     end
 
-    test "list_recipes/0 returns all recipes" do
-      recipe = recipe_fixture()
+    setup do
+      user_attrs = %{
+        email: "chenxsan@gmail.com",
+        username: "chenxsan",
+        password: String.duplicate("1", 6)
+      }
+
+      user = Repo.insert!(User.changeset(%User{}, user_attrs))
+
+      attrs = Map.put(@valid_attrs, :user_id, user.id)
+      {:ok, [attrs: attrs]}
+    end
+
+    test "list_recipes/0 returns all recipes", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
       assert Accounts.list_recipes() == [recipe]
     end
 
-    test "get_recipe!/1 returns the recipe with given id" do
-      recipe = recipe_fixture()
+    test "get_recipe!/1 returns the recipe with given id", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
       assert Accounts.get_recipe!(recipe.id) == recipe
     end
 
-    test "create_recipe/1 with valid data creates a recipe" do
-      assert {:ok, %Recipe{} = recipe} = Accounts.create_recipe(@valid_attrs)
+    test "create_recipe/1 with valid data creates a recipe", %{attrs: attrs} do
+      assert {:ok, %Recipe{} = recipe} = Accounts.create_recipe(attrs)
       assert recipe.content == "some content"
       assert recipe.episode == 42
       assert recipe.name == "some name"
@@ -124,8 +139,8 @@ defmodule Menu.AccountsTest do
       assert {:error, %Ecto.Changeset{}} = Accounts.create_recipe(@invalid_attrs)
     end
 
-    test "update_recipe/2 with valid data updates the recipe" do
-      recipe = recipe_fixture()
+    test "update_recipe/2 with valid data updates the recipe", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
       assert {:ok, recipe} = Accounts.update_recipe(recipe, @update_attrs)
       assert %Recipe{} = recipe
       assert recipe.content == "some updated content"
@@ -135,21 +150,66 @@ defmodule Menu.AccountsTest do
       assert recipe.title == "some updated title"
     end
 
-    test "update_recipe/2 with invalid data returns error changeset" do
-      recipe = recipe_fixture()
+    test "update_recipe/2 with invalid data returns error changeset", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
       assert {:error, %Ecto.Changeset{}} = Accounts.update_recipe(recipe, @invalid_attrs)
       assert recipe == Accounts.get_recipe!(recipe.id)
     end
 
-    test "delete_recipe/1 deletes the recipe" do
-      recipe = recipe_fixture()
+    test "delete_recipe/1 deletes the recipe", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
       assert {:ok, %Recipe{}} = Accounts.delete_recipe(recipe)
       assert_raise Ecto.NoResultsError, fn -> Accounts.get_recipe!(recipe.id) end
     end
 
-    test "change_recipe/1 returns a recipe changeset" do
-      recipe = recipe_fixture()
+    test "change_recipe/1 returns a recipe changeset", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
       assert %Ecto.Changeset{} = Accounts.change_recipe(recipe)
+    end
+
+    test "name is required" do
+      attrs = %{@valid_attrs | name: ""}
+      assert {:name, "请填写"} in errors_on(%Recipe{}, attrs)
+    end
+
+    test "title is required" do
+      attrs = %{@valid_attrs | title: ""}
+      assert {:title, "请填写"} in errors_on(%Recipe{}, attrs)
+    end
+
+    test "season is required" do
+      attrs = %{@valid_attrs | season: nil}
+      assert {:season, "请填写"} in errors_on(%Recipe{}, attrs)
+    end
+
+    test "episode is required" do
+      attrs = %{@valid_attrs | episode: nil}
+      assert {:episode, "请填写"} in errors_on(%Recipe{}, attrs)
+    end
+
+    test "season should greater than 0" do
+      attrs = %{@valid_attrs | season: 0}
+      assert {:season, "请输入大于 0 的数字"} in errors_on(%Recipe{}, attrs)
+    end
+
+    test "episode should greater than 0" do
+      attrs = %{@valid_attrs | episode: 0}
+      assert {:episode, "请输入大于 0 的数字"} in errors_on(%Recipe{}, attrs)
+    end
+
+    test "content is required" do
+      attrs = %{@valid_attrs | content: ""}
+      assert {:content, "请填写"} in errors_on(%Recipe{}, attrs)
+    end
+
+    test "user_id is required" do
+      attrs = %{@valid_attrs | user_id: nil}
+      assert {:user_id, "请填写"} in errors_on(%Recipe{}, attrs)
+    end
+
+    test "user_id should exist in users table" do
+      {:error, changeset} = Repo.insert(Recipe.changeset(%Recipe{}, @valid_attrs))
+      assert {:user_id, "用户不存在"} in errors_on(changeset)
     end
   end
 end
