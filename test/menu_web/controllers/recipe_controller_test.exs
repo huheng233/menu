@@ -3,6 +3,7 @@ defmodule MenuWeb.RecipeControllerTest do
 
   alias Menu.Accounts
   alias Menu.Accounts.User
+  alias Menu.Accounts.Recipe
 
   @user_attrs %{
     email: "chenxsan@mail.com",
@@ -69,8 +70,8 @@ defmodule MenuWeb.RecipeControllerTest do
     end
   end
 
-  @tag logged_in: true
   describe "create recipe" do
+    @tag logged_in: true
     test "redirects to show when data is valid", %{conn: conn, recipe: recipe} do
       conn = get(conn, recipe_path(conn, :show, recipe.id))
       assert html_response(conn, 200) =~ "Show Recipe"
@@ -121,5 +122,25 @@ defmodule MenuWeb.RecipeControllerTest do
         get(conn, recipe_path(conn, :show, recipe))
       end)
     end
+  end
+
+  test "guest access user action redirected to login page", %{conn: conn} do
+    recipe = Repo.insert!(%Recipe{})
+
+    Enum.each(
+      [
+        get(conn, recipe_path(conn, :index)),
+        get(conn, recipe_path(conn, :new)),
+        post(conn, recipe_path(conn, :create), recipe: %{}),
+        get(conn, recipe_path(conn, :show, recipe)),
+        get(conn, recipe_path(conn, :edit, recipe)),
+        put(conn, recipe_path(conn, :update, recipe), recipe: %{}),
+        delete(conn, recipe_path(conn, :delete, recipe))
+      ],
+      fn conn ->
+        assert redirected_to(conn) == session_path(conn, :new)
+        assert conn.halted
+      end
+    )
   end
 end
