@@ -8,39 +8,6 @@ defmodule MenuWeb.UserController do
   alias Menu.Accounts.User
   alias MenuWeb.Auth
 
-  @doc """
-  检查用户登录状态
-  Returns `conn`
-  """
-  def login_require(conn, _opts) do
-    if(conn.assigns.current_user) do
-      conn
-    else
-      conn
-      |> put_flash(:info, "请先登录")
-      |> redirect(to: session_path(conn, :new))
-      |> halt()
-    end
-  end
-
-  @doc """
-  检查用户是否授权访问动作
-
-  Returns `conn`
-  """
-  def self_require(conn, _) do
-    %{"id" => id} = conn.params
-
-    if String.to_integer(id) == conn.assigns.current_user.id do
-      conn
-    else
-      conn
-      |> put_flash(:error, "禁止访问未授权页面")
-      |> redirect(to: user_path(conn, :show, conn.assigns.current_user))
-      |> halt()
-    end
-  end
-
   def index(conn, _params) do
     users = Accounts.list_users()
     render(conn, "index.html", users: users)

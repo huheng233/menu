@@ -23,13 +23,15 @@ defmodule MenuWeb do
       import Plug.Conn
       import MenuWeb.Router.Helpers
       import MenuWeb.Gettext
+      import MenuWeb.Auth, only: [login_require: 2, self_require: 2]
     end
   end
 
   def view do
     quote do
-      use Phoenix.View, root: "lib/menu_web/templates",
-                        namespace: MenuWeb
+      use Phoenix.View,
+        root: "lib/menu_web/templates",
+        namespace: MenuWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_flash: 2, view_module: 1]
