@@ -11,6 +11,12 @@ defmodule MenuWeb.RecipeControllerTest do
     password: String.duplicate("1", 6)
   }
 
+  @another_user_attrs %{
+    email: "qq@mail.com",
+    username: "qqq",
+    password: String.duplicate("1", 6)
+  }
+
   @create_attrs %{
     content: "some content",
     episode: 42,
@@ -27,14 +33,9 @@ defmodule MenuWeb.RecipeControllerTest do
   }
   @invalid_attrs %{content: nil, episode: nil, name: nil, season: nil, title: nil}
 
-  def create_attrs do
-    user = Repo.insert!(User.changeset(%User{}, @user_attrs))
-    create_attrs = Map.put(@create_attrs, :user_id, user.id)
-  end
-
   def fixture(:recipe) do
-    create_attrs = create_attrs()
-    {:ok, recipe} = Accounts.create_recipe(create_attrs)
+    Repo.insert!(User.changeset(%User{}, @user_attrs))
+    {:ok, recipe} = Accounts.create_recipe(@create_attrs)
     recipe
   end
 
@@ -75,6 +76,9 @@ defmodule MenuWeb.RecipeControllerTest do
     test "redirects to show when data is valid", %{conn: conn, recipe: recipe} do
       conn = get(conn, recipe_path(conn, :show, recipe.id))
       assert html_response(conn, 200) =~ "Show Recipe"
+      %{"user_id" => id} = conn.private.plug_session
+      IO.inspect(recipe, label: "ggg", pretty: true)
+      assert Repo.get_by(Recipe, @create_attrs)
     end
 
     @tag logged_in: true
@@ -143,4 +147,19 @@ defmodule MenuWeb.RecipeControllerTest do
       end
     )
   end
+
+  # @tag logged_in: true
+  # test "creates resource and redirects when data is valid but with other user_id", %{conn: conn} do
+  #   #  创建另一个用户
+  #   user = %User{} |> User.changeset(@another_user_attrs) |> Repo.insert!()
+  #   # 将另一用户ID保存到recipe_attrs
+  #   recipe_attrs = @update_attrs |> Map.put_new(:user_id, user.id)
+  #   # 在我登录的情况下，给另一用户创建recipe
+  #   post(conn, recipe_path(conn, :create), recipe: recipe_attrs)
+  #   # 我只能给自己创建recipe
+  #   %{"user_id" => id} = conn.private.plug_session
+  #   assert Repo.get_by(Recipe, @update_attrs |> Map.put_new(:user_id, id))
+  #   # 另一个用户不应该有recipe
+  #   refute Repo.get_by(Recipe, recipe_attrs)
+  # end
 end

@@ -201,15 +201,5 @@ defmodule Menu.AccountsTest do
       attrs = %{@valid_attrs | content: ""}
       assert {:content, "请填写"} in errors_on(%Recipe{}, attrs)
     end
-
-    test "user_id is required" do
-      attrs = %{@valid_attrs | user_id: nil}
-      assert {:user_id, "请填写"} in errors_on(%Recipe{}, attrs)
-    end
-
-    test "user_id should exist in users table" do
-      {:error, changeset} = Repo.insert(Recipe.changeset(%Recipe{}, @valid_attrs))
-      assert {:user_id, "用户不存在"} in errors_on(changeset)
-    end
   end
 end
