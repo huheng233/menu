@@ -8,6 +8,11 @@ defmodule MenuWeb.RecipeControllerTest do
     username: "chehgnx",
     password: String.duplicate("1", 6)
   }
+  @another_user_attrs %{
+    email: "sa666@gmail.com",
+    username: "sa666",
+    password: String.duplicate("1", 6)
+  }
 
   @recipe_attrs %{
     content: "some content",
@@ -127,5 +132,24 @@ defmodule MenuWeb.RecipeControllerTest do
         assert conn.halted
       end
     )
+  end
+
+  @tag logged_in: true
+  test "user should not allowed to show recipe of other people", %{conn: conn, user: user} do
+    # 当前登录用户创建了一个菜谱
+    conn = post(conn, recipe_path(conn, :create), recipe: @recipe_attrs)
+    recipe_attrs = @recipe_attrs |> Map.put_new(:user_id, user.id)
+    recipe = Repo.get_by(Recipe, recipe_attrs)
+
+    # 新建一个用户
+    User.changeset(%User{}, @another_user_attrs) |> Repo.insert!()
+
+    # 登录新建的用户
+    conn = post(conn, session_path(conn, :create), session: @another_user_attrs)
+
+    # 读取前头的 recipe 失败，因为它不属于新用户所有
+    assert_error_sent(404, fn ->
+      get(conn, recipe_path(conn, :show, recipe))
+    end)
   end
 end

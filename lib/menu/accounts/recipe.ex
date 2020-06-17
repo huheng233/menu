@@ -2,14 +2,15 @@ defmodule Menu.Accounts.Recipe do
   use Ecto.Schema
   import Ecto.Changeset
 
+  alias Menu.Accounts.User
+
   schema "recipes" do
     field(:content, :string)
     field(:episode, :integer, default: 1)
     field(:name, :string)
     field(:season, :integer, default: 1)
     field(:title, :string)
-    field(:user_id, :id)
-
+    belongs_to(:user, User)
     timestamps()
   end
 

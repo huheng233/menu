@@ -7,7 +7,10 @@ defmodule MenuWeb.RecipeController do
   import Ecto
 
   def index(conn, _params) do
-    recipes = Accounts.list_recipes()
+    recipes =
+      assoc(conn.assigns.current_user, :recipes)
+      |> Accounts.list_recipes()
+
     render(conn, "index.html", recipes: recipes)
   end
 
@@ -40,18 +43,27 @@ defmodule MenuWeb.RecipeController do
   end
 
   def show(conn, %{"id" => id}) do
-    recipe = Accounts.get_recipe!(id)
+    recipe =
+      assoc(conn.assigns.current_user, :recipes)
+      |> Accounts.get_recipe!(id)
+
+    # recipe = assoc(conn.assigns.current_user, :recipes) |> Repo.get!(id)
     render(conn, "show.html", recipe: recipe)
   end
 
   def edit(conn, %{"id" => id}) do
-    recipe = Accounts.get_recipe!(id)
+    recipe =
+      assoc(conn.assigns.current_user, :recipes)
+      |> Accounts.get_recipe!(id)
+
     changeset = Accounts.change_recipe(recipe)
     render(conn, "edit.html", recipe: recipe, changeset: changeset)
   end
 
   def update(conn, %{"id" => id, "recipe" => recipe_params}) do
-    recipe = Accounts.get_recipe!(id)
+    recipe =
+      assoc(conn.assigns.current_user, :recipes)
+      |> Accounts.get_recipe!(id)
 
     case Accounts.update_recipe(recipe, recipe_params) do
       {:ok, recipe} ->
@@ -65,8 +77,11 @@ defmodule MenuWeb.RecipeController do
   end
 
   def delete(conn, %{"id" => id}) do
-    recipe = Accounts.get_recipe!(id)
-    {:ok, _recipe} = Accounts.delete_recipe(recipe)
+    # user_recipe = assoc(conn.assigns.current_user, :recipe)
+    # recipe = Accounts.get_recipe!(user_recipe, id)
+    # {:ok, _recipe} = Accounts.delete_recipe(recipe)
+    recipe = assoc(conn.assigns.current_user, :recipes) |> Repo.get!(id)
+    {:ok, _recipe} = Repo.delete(recipe)
 
     conn
     |> put_flash(:info, "Recipe deleted successfully.")
