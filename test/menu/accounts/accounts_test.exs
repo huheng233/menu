@@ -201,5 +201,15 @@ defmodule Menu.AccountsTest do
       attrs = %{@valid_attrs | content: ""}
       assert {:content, "请填写"} in errors_on(%Recipe{}, attrs)
     end
+
+    test "user must exist" do
+      changeset =
+        %User{id: -1}
+        |> Ecto.build_assoc(:recipes)
+        |> Recipe.changeset(@valid_attrs)
+
+      {:error, changeset} = Repo.insert(changeset)
+      assert {:user_id, "does not exist"} in errors_on(changeset)
+    end
   end
 end
