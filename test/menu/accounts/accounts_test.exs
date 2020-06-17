@@ -95,10 +95,11 @@ defmodule Menu.AccountsTest do
     @invalid_attrs %{content: nil, episode: nil, name: nil, season: nil, title: nil}
 
     def recipe_fixture(attrs \\ %{}) do
-      {:ok, recipe} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Accounts.create_recipe()
+      # recipe_attrs = attrs |> Enum.into(@valid_attrs)
+
+      user_strcut = %User{id: attrs.user_id} |> build_assoc(:recipes)
+
+      {:ok, recipe} = Accounts.create_recipe(user_strcut, @valid_attrs)
 
       recipe
     end
@@ -116,18 +117,21 @@ defmodule Menu.AccountsTest do
       {:ok, [attrs: attrs]}
     end
 
-    # test "list_recipes/0 returns all recipes", %{attrs: attrs} do
-    #   recipe = recipe_fixture(attrs)
-    #   assert Accounts.list_recipes() == [recipe]
-    # end
+    test "list_recipes/0 returns all recipes", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
+      # IO.inspect(recipe, label: "aaaa", pretty: true)
+      assert Accounts.list_recipes(assoc(%User{id: attrs.user_id}, :recipes)) == [recipe]
+    end
 
-    # test "get_recipe!/1 returns the recipe with given id", %{attrs: attrs} do
-    #   recipe = recipe_fixture(attrs)
-    #   assert Accounts.get_recipe!(recipe.id) == recipe
-    # end
+    test "get_recipe!/1 returns the recipe with given id", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
+      user_recipe = assoc(%User{id: attrs.user_id}, :recipes)
+      assert Accounts.get_recipe!(user_recipe, recipe.id) == recipe
+    end
 
     test "create_recipe/1 with valid data creates a recipe", %{attrs: attrs} do
-      assert {:ok, %Recipe{} = recipe} = Accounts.create_recipe(attrs)
+      user_recipe = %User{id: attrs.user_id} |> build_assoc(:recipes)
+      assert {:ok, %Recipe{} = recipe} = Accounts.create_recipe(user_recipe, @valid_attrs)
       assert recipe.content == "some content"
       assert recipe.episode == 42
       assert recipe.name == "some name"
@@ -135,8 +139,9 @@ defmodule Menu.AccountsTest do
       assert recipe.title == "some title"
     end
 
-    test "create_recipe/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Accounts.create_recipe(@invalid_attrs)
+    test "create_recipe/1 with invalid data returns error changeset", %{attrs: attrs} do
+      user_recipe = %User{id: attrs.user_id} |> build_assoc(:recipes)
+      assert {:error, %Ecto.Changeset{}} = Accounts.create_recipe(user_recipe, @invalid_attrs)
     end
 
     test "update_recipe/2 with valid data updates the recipe", %{attrs: attrs} do
@@ -150,17 +155,19 @@ defmodule Menu.AccountsTest do
       assert recipe.title == "some updated title"
     end
 
-    # test "update_recipe/2 with invalid data returns error changeset", %{attrs: attrs} do
-    #   recipe = recipe_fixture(attrs)
-    #   assert {:error, %Ecto.Changeset{}} = Accounts.update_recipe(recipe, @invalid_attrs)
-    #   assert recipe == Accounts.get_recipe!(recipe.id)
-    # end
+    test "update_recipe/2 with invalid data returns error changeset", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
+      assert {:error, %Ecto.Changeset{}} = Accounts.update_recipe(recipe, @invalid_attrs)
+      user_recipe = assoc(%User{id: attrs.user_id}, :recipes)
+      assert recipe == Accounts.get_recipe!(user_recipe, recipe.id)
+    end
 
-    # test "delete_recipe/1 deletes the recipe", %{attrs: attrs} do
-    #   recipe = recipe_fixture(attrs)
-    #   assert {:ok, %Recipe{}} = Accounts.delete_recipe(recipe)
-    #   assert_raise Ecto.NoResultsError, fn -> Accounts.get_recipe!(recipe.id) end
-    # end
+    test "delete_recipe/1 deletes the recipe", %{attrs: attrs} do
+      recipe = recipe_fixture(attrs)
+      assert {:ok, %Recipe{}} = Accounts.delete_recipe(recipe)
+      user_recipe = assoc(%User{id: attrs.user_id}, :recipes)
+      assert_raise Ecto.NoResultsError, fn -> Accounts.get_recipe!(user_recipe, recipe.id) end
+    end
 
     test "change_recipe/1 returns a recipe changeset", %{attrs: attrs} do
       recipe = recipe_fixture(attrs)

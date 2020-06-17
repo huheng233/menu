@@ -147,8 +147,8 @@ defmodule Menu.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_recipe(attrs \\ %{}) do
-    %Recipe{}
+  def create_recipe(user_struct, attrs \\ %{}) do
+    user_struct
     |> Recipe.changeset(attrs)
     |> Repo.insert()
   end
