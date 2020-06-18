@@ -7,7 +7,6 @@
       <th>Title</th>
       <th>Season</th>
       <th>Episode</th>
-      <th>Content</th>
 
       <th></th>
     </tr>
@@ -19,7 +18,6 @@
       <td><%= recipe.title %></td>
       <td><%= recipe.season %></td>
       <td><%= recipe.episode %></td>
-      <td><%= recipe.content %></td>
 
       <td class="text-right">
         <span><%= link "Show", to: recipe_path(@conn, :show, recipe), class: "btn btn-default btn-xs" %></span>

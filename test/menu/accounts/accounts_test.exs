@@ -209,6 +209,11 @@ defmodule Menu.AccountsTest do
       assert {:content, "请填写"} in errors_on(%Recipe{}, attrs)
     end
 
+    test "url should be valid" do
+      attrs = Map.put(@valid_attrs, :url, "asda")
+      assert {:url, "url 错误"} in errors_on(%Recipe{}, attrs)
+    end
+
     test "user must exist" do
       changeset =
         %User{id: -1}

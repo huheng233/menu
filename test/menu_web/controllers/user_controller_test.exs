@@ -52,6 +52,7 @@ defmodule MenuWeb.UserControllerTest do
       conn = get(conn, user_path(conn, :index))
       assert html_response(conn, 200) =~ Map.get(@create_attrs, :username)
       assert html_response(conn, 200) =~ "退出"
+      assert html_response(conn, 200) =~ "菜谱"
     end
 
     test "renders errors when data is invalid", %{conn: conn} do

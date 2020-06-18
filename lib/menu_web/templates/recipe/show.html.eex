@@ -22,6 +22,11 @@
     <%= @recipe.episode %>
   </li>
 
+<li>
+    <strong>Url:</strong>
+    <%= @recipe.url %>
+  </li>
+
   <li>
     <strong>Content:</strong>
     <%= @recipe.content %>
